@@ -1,11 +1,13 @@
 /**
- * PRODUCTION CLIENT: FORM HANDLER, THEME & NAVIGATION
+ * NEURAL MARINE PLATFORM - PRODUCTION CLIENT JAVASCRIPT
+ * Ultra-fast, lightweight theme management, mobile nav, and contact form handling.
  */
 
 const ACCESS_KEY = '79ce2811-a00d-4a73-9014-44862bc3bf92';
 const RECIPIENT_EMAIL = 'hkottapa@student.gitam.edu';
 
 document.addEventListener('DOMContentLoaded', () => {
+
   // --------------------------------------------------------------------------
   // 1. Theme Management (Light / Dark Mode)
   // --------------------------------------------------------------------------
@@ -13,18 +15,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const root = document.documentElement;
 
   const savedTheme = localStorage.getItem('aura_theme');
-  const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
   if (savedTheme) {
     root.setAttribute('data-theme', savedTheme);
-  } else if (systemPrefersDark) {
+  } else {
+    // Default to dark mode for deep violet aesthetic
     root.setAttribute('data-theme', 'dark');
   }
 
   if (themeToggle) {
     themeToggle.addEventListener('click', () => {
-      const currentTheme = root.getAttribute('data-theme') || 'light';
-      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      const currentTheme = root.getAttribute('data-theme') || 'dark';
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
       root.setAttribute('data-theme', newTheme);
       localStorage.setItem('aura_theme', newTheme);
       showToast(`Switched to ${newTheme === 'dark' ? 'Dark' : 'Light'} Mode`, 'info');
@@ -62,12 +63,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --------------------------------------------------------------------------
-  // 3. Contact & Team Registration Form Submission
+  // 3. Contact & Registration Form Submission
   // --------------------------------------------------------------------------
   const contactForm = document.getElementById('simpleContactForm');
   const submitBtn = document.getElementById('submitBtn');
 
-  // RFC-5322 compliant regex
   const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
   const PHONE_REGEX = /^[+]?[(]?[0-9]{1,4}[)]?[-\s./0-9]{6,15}$/;
 
@@ -85,7 +85,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const phone = phoneInput ? phoneInput.value.trim() : '';
       const message = messageInput ? messageInput.value.trim() : '';
 
-      // --- Validation ---
       if (!teamName || teamName.length < 2) {
         showToast('Please enter a valid Team Name (at least 2 characters).', 'error');
         nameInput?.focus();
@@ -110,7 +109,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // --- Loading State ---
       const btnSpan = submitBtn ? submitBtn.querySelector('span') : null;
       const originalText = btnSpan ? btnSpan.textContent : 'Send Message';
 
@@ -122,7 +120,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // --- Prepare FormData for Web3Forms API ---
       const formData = new FormData(contactForm);
       if (!formData.get('access_key')) {
         formData.append('access_key', ACCESS_KEY);
@@ -151,7 +148,6 @@ document.addEventListener('DOMContentLoaded', () => {
           const errMsg = data.message || 'Submission was not accepted by the email gateway.';
           console.warn('API Response Warning:', data);
 
-          // If the Web3Forms access key requires email verification:
           if (errMsg.toLowerCase().includes('activate') || errMsg.toLowerCase().includes('check your email')) {
             showToast('Please check hkottapa@student.gitam.edu inbox to activate your Web3Forms key once.', 'info');
           } else {
@@ -160,12 +156,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       } catch (networkError) {
         console.error('Network dispatch error:', networkError);
-        
-        // Fallback: If opened via file:/// where fetch CORS is restricted by browser security policies
-        showToast('Direct network restricted. Opening your email client to send...', 'info');
+        showToast('Direct network restricted. Opening your email client...', 'info');
         
         const mailtoUrl = `mailto:${RECIPIENT_EMAIL}?subject=${encodeURIComponent('New Team Inquiry: ' + teamName)}&body=${encodeURIComponent('Team Name: ' + teamName + '\nEmail: ' + email + '\nPhone: ' + (phone || 'N/A') + '\n\nMessage:\n' + message)}`;
-        
         window.location.href = mailtoUrl;
       } finally {
         if (submitBtn) {
@@ -202,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --------------------------------------------------------------------------
-  // 5. Update Current Year
+  // 5. Current Year
   // --------------------------------------------------------------------------
   const yearEl = document.getElementById('year');
   if (yearEl) {
